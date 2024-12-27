@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 
 let pool: Pool;
 
-// replace
+// replace with env vars
 export function getDb() {
   if (!pool) {
     pool = new Pool({

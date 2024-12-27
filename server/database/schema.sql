@@ -5,39 +5,38 @@ CREATE DATABASE smalltalk;
 
 -- Connect to the `smalltalk` database
 \c smalltalk;
-
--- Create the `users` table
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  username VARCHAR(255) NOT NULL UNIQUE,
-  first_name VARCHAR(255) NOT NULL,
-  last_name VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL
+  username VARCHAR(50) UNIQUE NOT NULL,
+  firstName VARCHAR(100),
+  lastName VARCHAR(100),
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  last_active TIMESTAMP WITH TIME ZONE
 );
 
--- Create the `inboxes` table
-CREATE TABLE IF NOT EXISTS inboxes (
+-- Create Conversations table
+CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL,
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  name VARCHAR(100),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create the `inbox_users` table
-CREATE TABLE IF NOT EXISTS inbox_users (
-  id SERIAL PRIMARY KEY,
-  inbox_id INT NOT NULL,
-  user_id INT NOT NULL,
-  CONSTRAINT fk_inbox FOREIGN KEY (inbox_id) REFERENCES inboxes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- Create User_Conversations table (for many-to-many relationship)
+CREATE TABLE user_conversations (
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, conversation_id)
 );
 
--- Create the `messages` table
-CREATE TABLE IF NOT EXISTS messages (
-  id SERIAL PRIMARY KEY,
-  inbox_id INT NOT NULL,
-  user_id INT NOT NULL,
-  message TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_inbox FOREIGN KEY (inbox_id) REFERENCES inboxes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- Create Messages table
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    sender_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    sent_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE
 );

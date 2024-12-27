@@ -4,8 +4,10 @@ import { createServer } from "http"
 import { Server, Socket } from "socket.io"
 import cors from 'cors';
 import { testConnection } from "../database";
+import messageController from "./controllers/messageController";
+import conversationController from "./controllers/conversationController";
 
-testConnection();
+// testConnection();
 
 dotenv.config();
 const devOrigin = "http://localhost:3000";
@@ -16,6 +18,9 @@ app.use(express.urlencoded({ extended: true }))
 const port: String | Number = process.env.PORT || 8000;
 const server = createServer(app);
 const io = new Server(server, { cors: { origin: devOrigin, methods: ["GET", "POST"] }});
+
+app.use("/api/messages", messageController);
+app.use("/api/conversation", conversationController);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to Express & TypeScript Server");
